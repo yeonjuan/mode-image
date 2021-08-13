@@ -1,19 +1,14 @@
-import type * as types from "canvas";
-
-type Pair<T> = [T, T];
-type NumberPair = Pair<number>;
-type Size = { width: number; height: number };
-type Pos = { x: number; y: number };
-export type PartialSize = Partial<Size>;
-export type RectArea = Size & Pos;
-export type ImageSource = string | HTMLImageElement | types.Image;
-type CreateCanvas = (size?: NumberPair) => HTMLCanvasElement;
-type CloneCanvas = (old: HTMLCanvasElement) => HTMLCanvasElement;
-type CreateImage = () => HTMLImageElement;
-type Options = {
-  createCanvas?: (...arg: any) => any;
-  createImage?: (...arg: any) => any;
-};
+import type {
+  CreateCanvas,
+  CloneCanvas,
+  ImageSource,
+  Options,
+  PartialSize,
+  RectArea,
+  NumberPair,
+  Size,
+  CreateImage,
+} from "./types";
 
 const DEFAULT_OPTIONS = {};
 

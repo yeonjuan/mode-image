@@ -17,6 +17,7 @@
 - [resize](#resizesize)
 - [crop](#croparea)
 - [repeatX](#repeatxnum)
+- [repeatY](#repeatynum)
 
 ### .rotate(_radian_)
 

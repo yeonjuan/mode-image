@@ -2,7 +2,7 @@ import modImage from "../src/index";
 import * as canvas from "canvas";
 import options from "./options";
 import { fixtures, getImageBufferAfter } from "./helpers";
-import type { RectArea } from "../src";
+import type { RectArea } from "../src/types";
 
 const crop = (image: canvas.Image, area: RectArea) => {
   return modImage(image, options).crop(area).toDataURL();

@@ -2,7 +2,6 @@ import modImage from "../src/index";
 import * as canvas from "canvas";
 import options from "./options";
 import { fixtures, getImageBufferAfter } from "./helpers";
-import type { PartialSize } from "../src";
 
 const repeatX = (image: canvas.Image, repeat: number) => {
   return modImage(image, options).repeatX(repeat).toDataURL();
