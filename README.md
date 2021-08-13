@@ -1,14 +1,14 @@
-# mod-image
+# mode-image
 
 ## Installation
 
 - npm
   ```console
-  npm install mod-image
+  npm install mode-image
   ```
 - yarn
   ```console
-  yarn add mod-image
+  yarn add mode-image
   ```
 
 ## Usage
@@ -24,7 +24,7 @@
 | <img src="./tests/__fixtures__/right-arrow-100-100.png"> | <img src="./tests/__image_snapshots__/rotate-test-ts-rotate-90-deg-100-x-100-1-snap.png"> |
 
 ```js
-import modImage from "mod-image";
+import modImage from "mode-image";
 
 const result = await modeImage("/origin.png")
   .rotate((Math.PI / 180) * 90)
@@ -45,7 +45,7 @@ const result = await modeImage("/origin.png")
 | <img src="./tests/__fixtures__/smile-150-150.png"> | <img src="./tests/__image_snapshots__/resize-test-ts-resize-resize-150-x-150-to-50-x-50-1-snap.png"> |
 
 ```js
-import modImage from "mod-image";
+import modImage from "mode-image";
 
 const result = await modeImage("/origin.png")
   .resize({

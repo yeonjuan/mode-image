@@ -1,14 +1,15 @@
 {
-  "name": "mod-image",
-  "version": "1.0.0",
+  "name": "mode-image",
+  "version": "0.0.1",
   "description": "",
-  "main": "index.js",
   "scripts": {
-    "build": "tsc",
-    "build:web": "rollup -c rollup.config.js",
+    "check": "tsc --noEmit",
+    "build": "rollup -c rollup.config.js",
     "format": "prettier --write .",
     "test": "jest"
   },
+  "main": "build/index.umd.js",
+  "module": "build/index.es2015.js",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/yeonjuan/mod-image.git"

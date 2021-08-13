@@ -1,11 +1,17 @@
 import typescript from "@rollup/plugin-typescript";
-
+const pkgJSON = require("./package.json");
 export default {
   input: "src/index.ts",
-  output: {
-    file: "out.js",
-    format: "iife",
-    name: "ModImage",
-  },
   plugins: [typescript()],
+  output: [
+    {
+      file: pkgJSON.main,
+      format: "umd",
+      name: "modeImage",
+    },
+    {
+      file: pkgJSON.module,
+      format: "es",
+    },
+  ],
 };
