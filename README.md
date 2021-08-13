@@ -82,7 +82,7 @@ import modImage from "mode-image";
 const result = await modeImage("/origin.png")
   .crop({
     x: 50,
-    y: 50
+    y: 50,
     width: 50,
     height: 50,
   })
