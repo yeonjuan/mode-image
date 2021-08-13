@@ -1,5 +1,16 @@
 # mod-image
 
+## Installation
+
+- npm
+  ```console
+  npm install mod-image
+  ```
+- yarn
+  ```console
+  yarn add mod-image
+  ```
+
 ## Usage
 
 ### .rotate(_radian_)
@@ -15,8 +26,32 @@
 ```js
 import modImage from "mod-image";
 
-const result = await modeImage("/origin/png")
+const result = await modeImage("/origin.png")
   .rotate((Math.PI / 180) * 90)
+  .toDataUrl();
+// result: data:image/png;base64,...
+```
+
+### .resize(_size_)
+
+- size (object):
+  - width (number): height to resize
+  - height (number): Width to resize
+
+#### example
+
+| /origin.png                                        | result                                                                                               |
+| -------------------------------------------------- | ---------------------------------------------------------------------------------------------------- |
+| <img src="./tests/__fixtures__/smile-150-150.png"> | <img src="./tests/__image_snapshots__/resize-test-ts-resize-resize-150-x-150-to-50-x-50-1-snap.png"> |
+
+```js
+import modImage from "mod-image";
+
+const result = await modeImage("/origin.png")
+  .resize({
+    width: 50,
+    height: 50,
+  })
   .toDataUrl();
 // result: data:image/png;base64,...
 ```
