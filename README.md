@@ -2,11 +2,13 @@
 
 ## Usage
 
-### `.rotate`(radian)
+### .rotate(_radian_)
 
 - radian (number): The rotation angle, clockwise in radians.
 
-| `/origin.png`                                            | result                                                                                    |
+#### example
+
+| /origin.png                                              | result                                                                                    |
 | -------------------------------------------------------- | ----------------------------------------------------------------------------------------- |
 | <img src="./tests/__fixtures__/right-arrow-100-100.png"> | <img src="./tests/__image_snapshots__/rotate-test-ts-rotate-90-deg-100-x-100-1-snap.png"> |
 
