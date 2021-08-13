@@ -12,7 +12,6 @@
   ```
 
 ## Usage
-
 - [rotate](#rotateradian)
 - [resize](#resizesize)
 - [crop](#croparea)
@@ -59,7 +58,7 @@ const result = await modeImage("/origin.png")
     height: 50,
   })
   .toDataUrl();
-// result: data:image/png;base64,...
+// data:image/png;base64,...
 ```
 
 ### .crop(_area_)
@@ -87,7 +86,7 @@ const result = await modeImage("/origin.png")
     height: 50,
   })
   .toDataUrl();
-// result: data:image/png;base64,...
+// data:image/png;base64,...
 ```
 
 ## .repeatX(_num_)
@@ -104,7 +103,7 @@ const result = await modeImage("/origin.png")
 import modImage from "mode-image";
 
 const result = await modeImage("/origin.png").repeatX(3).toDataUrl();
-// result: data:image/png;base64,...
+// data:image/png;base64,...
 ```
 
 ## .repeatY(_num_)
@@ -121,7 +120,7 @@ const result = await modeImage("/origin.png").repeatX(3).toDataUrl();
 import modImage from "mode-image";
 
 const result = await modeImage("/origin.png").repeatY(2).toDataUrl();
-// result: data:image/png;base64,...
+// data:image/png;base64,...
 ```
 
 ## License

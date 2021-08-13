@@ -1,11 +1,10 @@
 import modImage from "../src/index";
 import * as canvas from "canvas";
-import options from "./options";
-import { fixtures, getImageBufferAfter } from "./helpers";
+import { fixtures, getImageBufferAfter, nodeModeImage } from "./helpers";
 import type { PartialSize } from "../src/types";
 
 const resize = (image: canvas.Image, size: PartialSize) => {
-  return modImage(image, options).resize(size).toDataURL();
+  return nodeModeImage(image).resize(size).toDataURL();
 };
 
 const resizeImage = getImageBufferAfter(resize);

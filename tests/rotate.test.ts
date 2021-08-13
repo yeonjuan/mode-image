@@ -1,10 +1,9 @@
 import modImage from "../src/index";
 import * as canvas from "canvas";
-import options from "./options";
-import { fixtures, getImageBufferAfter } from "./helpers";
+import { fixtures, getImageBufferAfter, nodeModeImage } from "./helpers";
 
 const rotate = (image: canvas.Image, radian: number) => {
-  return modImage(image, options).rotate(radian).toDataURL();
+  return nodeModeImage(image).rotate(radian).toDataURL();
 };
 
 const rotateImage = getImageBufferAfter(rotate);

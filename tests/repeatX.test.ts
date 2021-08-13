@@ -1,10 +1,8 @@
-import modImage from "../src/index";
 import * as canvas from "canvas";
-import options from "./options";
-import { fixtures, getImageBufferAfter } from "./helpers";
+import { fixtures, getImageBufferAfter, nodeModeImage } from "./helpers";
 
 const repeatX = (image: canvas.Image, repeat: number) => {
-  return modImage(image, options).repeatX(repeat).toDataURL();
+  return nodeModeImage(image).repeatX(repeat).toDataURL();
 };
 
 const repeatXImage = getImageBufferAfter(repeatX);
