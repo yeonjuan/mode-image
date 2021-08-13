@@ -13,6 +13,10 @@
 
 ## Usage
 
+- [rotate](#rotateradian)
+- [resize](#resizesize)
+- [crop](#croparea)
+
 ### .rotate(_radian_)
 
 - radian (number): The rotation angle, clockwise in radians.
@@ -83,3 +87,7 @@ const result = await modeImage("/origin.png")
   .toDataUrl();
 // result: data:image/png;base64,...
 ```
+
+## License
+
+MIT
