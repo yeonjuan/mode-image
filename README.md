@@ -2,7 +2,9 @@
 
 ## Usage
 
-### .rotate(`radian`)
+### `.rotate`(radian)
+
+- radian (number): The rotation angle, clockwise in radians.
 
 | `/origin.png`                                            | result                                                                                    |
 | -------------------------------------------------------- | ----------------------------------------------------------------------------------------- |
