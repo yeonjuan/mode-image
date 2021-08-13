@@ -16,6 +16,7 @@
 - [rotate](#rotateradian)
 - [resize](#resizesize)
 - [crop](#croparea)
+- [repeatX](#repeatxnum)
 
 ### .rotate(_radian_)
 
@@ -44,7 +45,7 @@ const result = await modeImage("/origin.png")
 
 #### example
 
-| /origin.png (150 x 150)                            | result                                                                                               |
+| /origin.png (150 x 150)                            | result (50 x 50)                                                                                     |
 | -------------------------------------------------- | ---------------------------------------------------------------------------------------------------- |
 | <img src="./tests/__fixtures__/smile-150-150.png"> | <img src="./tests/__image_snapshots__/resize-test-ts-resize-resize-150-x-150-to-50-x-50-1-snap.png"> |
 
@@ -70,7 +71,7 @@ const result = await modeImage("/origin.png")
 
 #### example
 
-| /origin.png (150 x 150)                            | result                                                                                             |
+| /origin.png (150 x 150)                            | result (50 x 50)                                                                                   |
 | -------------------------------------------------- | -------------------------------------------------------------------------------------------------- |
 | <img src="./tests/__fixtures__/smile-150-150.png"> | <img src="./tests/__image_snapshots__/crop-test-ts-resize-resize-150-x-150-to-50-x-50-2-snap.png"> |
 
@@ -85,6 +86,23 @@ const result = await modeImage("/origin.png")
     height: 50,
   })
   .toDataUrl();
+// result: data:image/png;base64,...
+```
+
+## .repeatX(_num_)
+
+- num (number):
+
+#### example
+
+| /origin.png (150 x 150)                           | result (450 x 150)                                                                                      |
+| ------------------------------------------------- | ------------------------------------------------------------------------------------------------------- |
+| <img src="./tests/__fixtures__/walk-150-150.png"> | <img src="./tests/__image_snapshots__/repeat-x-test-ts-repeat-x-repeat-x-3-times-150-x-150-1-snap.png"> |
+
+```js
+import modImage from "mode-image";
+
+const result = await modeImage("/origin.png").repeatX(3).toDataUrl();
 // result: data:image/png;base64,...
 ```
 

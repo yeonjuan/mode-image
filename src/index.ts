@@ -103,9 +103,31 @@ class ModImage {
     return this;
   }
 
+  repeatX(num: number) {
+    this._pushTask(() => {
+      const clone = this._cloneCanvas();
+      this._clearCanvas();
+      this._setCanvasSize(mul1(this._canvasSize(), num));
+      this._context.save();
+      const pattern = this._context.createPattern(clone, "repeat-x")!;
+      this._context.fillStyle = pattern;
+      this._context.fillRect(0, 0, ...this._canvasSize());
+      this._context.restore();
+    });
+    return this;
+  }
+
   merge(source: ImageSource) {
     this._pushTask(async () => {
+      const clone = this._cloneCanvas();
+      this._clearCanvas();
       const image = await this._loadImage(source);
+      const mergedSize: NumberPair = [
+        max(image.width, clone.width),
+        max(image.height, clone.height),
+      ];
+      this._setCanvasSize(mergedSize);
+      this._context.drawImage(clone, 0, 0, clone.width, clone.height);
       this._context.drawImage(image, 0, 0, image.width, image.height);
     });
     return this;
@@ -202,6 +224,8 @@ const initLoadImage = (createImage: CreateImage) => {
 
 const sin = Math.sign;
 const cos = Math.cos;
+const max = Math.max;
+const min = Math.min;
 
 const calcRotatedSize = (
   [width, height]: NumberPair,
@@ -218,6 +242,14 @@ const calcRotatedSize = (
 
 const sizeToPair = ({ width, height }: Size): NumberPair => {
   return [width, height];
+};
+
+const mul1 = ([first, second]: NumberPair, num: number): NumberPair => {
+  return [first * num, second];
+};
+
+const mul2 = ([first, second]: NumberPair, num: number): NumberPair => {
+  return [first, second * num];
 };
 
 export default (src: ImageSource, options?: Options) =>
