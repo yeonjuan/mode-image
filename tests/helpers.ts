@@ -2,7 +2,7 @@ import path from "path";
 import dataUriToBuffer from "data-uri-to-buffer";
 import * as canvas from "canvas";
 
-type Name = "right-arrow";
+type Name = "right-arrow" | "smile";
 type Size = `${number}-${number}`;
 type Ext = "png";
 

@@ -1,9 +1,11 @@
 import type * as types from "canvas";
 
-type Size = [width: number, height: number];
-type Pos = [x: number, y: number];
-type ImageSource = string | HTMLImageElement | types.Image;
-type CreateCanvas = (size?: Size) => HTMLCanvasElement;
+type Pair<T> = [T, T];
+type NumberPair = Pair<number>;
+type Size = { width: number; height: number };
+export type PartialSize = Partial<Size>;
+export type ImageSource = string | HTMLImageElement | types.Image;
+type CreateCanvas = (size?: NumberPair) => HTMLCanvasElement;
 type CloneCanvas = (old: HTMLCanvasElement) => HTMLCanvasElement;
 type CreateImage = () => HTMLImageElement;
 type Options = {
@@ -64,12 +66,17 @@ class ModImage {
     return this;
   }
 
-  resize(...size: Size): this {
+  resize(size: PartialSize): this {
     this._pushTask(() => {
       const clone = this._cloneCanvas();
       this._clearCanvas();
-      this._setCanvasSize(size);
-      this._context.drawImage(clone, 0, 0, ...this._canvasSize());
+      const [width, height] = this._canvasSize();
+      const targetSize = sizeToPair({
+        width: size.width || width,
+        height: size.height || height,
+      });
+      this._setCanvasSize(targetSize);
+      this._context.drawImage(clone, 0, 0, ...targetSize);
     });
     return this;
   }
@@ -95,11 +102,11 @@ class ModImage {
     this._context.clearRect(0, 0, ...this._canvasSize());
   }
 
-  private _canvasSize(): Size {
+  private _canvasSize(): NumberPair {
     return [this._canvas.width, this._canvas.height];
   }
 
-  private _setCanvasSize(size: Size): void {
+  private _setCanvasSize(size: NumberPair): void {
     [this._canvas.width, this._canvas.height] = size;
   }
 
@@ -141,7 +148,7 @@ const half = (x: number): number => x / 2;
 const neg = (x: number): number => -x;
 
 const initCreateCanvas = (createCanvas: CreateCanvas) => {
-  return (size?: Size): HTMLCanvasElement => {
+  return (size?: NumberPair): HTMLCanvasElement => {
     const canvas = createCanvas();
     size && ([canvas.width, canvas.height] = size);
     return canvas;
@@ -174,22 +181,21 @@ const initLoadImage = (createImage: CreateImage) => {
 const sin = Math.sign;
 const cos = Math.cos;
 
-const calcRotatedSize = ([width, height]: Size, radian: number): Size => {
+const calcRotatedSize = (
+  [width, height]: NumberPair,
+  radian: number
+): NumberPair => {
   const cosRadian = cos(radian);
   const sinRadian = sin(radian);
-  const rSize: Size = [
+  const rSize: NumberPair = [
     sinRadian * height + cosRadian * width,
     sinRadian * width + cosRadian * height,
   ];
   return rSize;
 };
 
-const rotate = ([x, y]: Pos, radian: number): Pos => {
-  const cosRadian = cos(radian);
-  const sinRadian = sin(radian);
-  const rx = x * cosRadian - y * sinRadian;
-  const ry = x * sinRadian + y * cosRadian;
-  return [rx, ry];
+const sizeToPair = ({ width, height }: Size): NumberPair => {
+  return [width, height];
 };
 
 export default (src: ImageSource, options?: Options) =>
