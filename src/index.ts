@@ -1,6 +1,7 @@
 import type * as types from "canvas";
 
 type Size = [width: number, height: number];
+type Pos = [x: number, y: number];
 type ImageSource = string | HTMLImageElement | types.Image;
 type CreateCanvas = (size?: Size) => HTMLCanvasElement;
 type CloneCanvas = (old: HTMLCanvasElement) => HTMLCanvasElement;
@@ -44,12 +45,20 @@ class ModImage {
   rotate(angle: number): this {
     this._pushTask(() => {
       const clone = this._cloneCanvas();
+      this._setCanvasSize(calcRotatedSize(this._canvasSize(), angle));
       this._clearCanvas();
-      const [cx, cy] = this._canvasSize().map(center);
+      const [cx, cy] = this._canvasSize().map(half);
       this._context.save();
       this._context.translate(cx, cy);
       this._context.rotate(angle);
-      this._context.drawImage(clone, -cx, -cy, clone.width, clone.height);
+      this._context.translate(-cx, -cy);
+      this._context.drawImage(
+        clone,
+        cx - clone.width / 2,
+        cy - clone.height / 2,
+        clone.width,
+        clone.height
+      );
       this._context.restore();
     });
     return this;
@@ -128,7 +137,8 @@ class ModImage {
   }
 }
 
-const center = (x: number): number => x / 2;
+const half = (x: number): number => x / 2;
+const neg = (x: number): number => -x;
 
 const initCreateCanvas = (createCanvas: CreateCanvas) => {
   return (size?: Size): HTMLCanvasElement => {
@@ -141,7 +151,7 @@ const initCreateCanvas = (createCanvas: CreateCanvas) => {
 const initCloneCanvas = (createCanvas: CreateCanvas) => {
   return (old: HTMLCanvasElement) => {
     const clone = createCanvas([old.width, old.height]);
-    clone.getContext("2d")!.drawImage(old, 0, 0);
+    clone.getContext("2d")!.drawImage(old, 0, 0, old.width, old.height);
     return clone;
   };
 };
@@ -159,6 +169,27 @@ const initLoadImage = (createImage: CreateImage) => {
       image.src = src;
     });
   };
+};
+
+const sin = Math.sign;
+const cos = Math.cos;
+
+const calcRotatedSize = ([width, height]: Size, radian: number): Size => {
+  const cosRadian = cos(radian);
+  const sinRadian = sin(radian);
+  const rSize: Size = [
+    sinRadian * height + cosRadian * width,
+    sinRadian * width + cosRadian * height,
+  ];
+  return rSize;
+};
+
+const rotate = ([x, y]: Pos, radian: number): Pos => {
+  const cosRadian = cos(radian);
+  const sinRadian = sin(radian);
+  const rx = x * cosRadian - y * sinRadian;
+  const ry = x * sinRadian + y * cosRadian;
+  return [rx, ry];
 };
 
 export default (src: ImageSource, options?: Options) =>
