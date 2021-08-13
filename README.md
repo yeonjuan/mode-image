@@ -106,6 +106,23 @@ const result = await modeImage("/origin.png").repeatX(3).toDataUrl();
 // result: data:image/png;base64,...
 ```
 
+## .repeatY(_num_)
+
+- num (number):
+
+#### example
+
+| /origin.png (150 x 150)                           | result (300 x 150)                                                                                      |
+| ------------------------------------------------- | ------------------------------------------------------------------------------------------------------- |
+| <img src="./tests/__fixtures__/walk-150-150.png"> | <img src="./tests/__image_snapshots__/repeat-y-test-ts-repeat-y-repeat-y-2-times-150-x-150-1-snap.png"> |
+
+```js
+import modImage from "mode-image";
+
+const result = await modeImage("/origin.png").repeatY(2).toDataUrl();
+// result: data:image/png;base64,...
+```
+
 ## License
 
 MIT

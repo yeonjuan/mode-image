@@ -117,6 +117,20 @@ class ModImage {
     return this;
   }
 
+  repeatY(num: number) {
+    this._pushTask(() => {
+      const clone = this._cloneCanvas();
+      this._clearCanvas();
+      this._setCanvasSize(mul2(this._canvasSize(), num));
+      this._context.save();
+      const pattern = this._context.createPattern(clone, "repeat-y")!;
+      this._context.fillStyle = pattern;
+      this._context.fillRect(0, 0, ...this._canvasSize());
+      this._context.restore();
+    });
+    return this;
+  }
+
   merge(source: ImageSource) {
     this._pushTask(async () => {
       const clone = this._cloneCanvas();
