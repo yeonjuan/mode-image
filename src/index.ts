@@ -3,7 +3,9 @@ import type * as types from "canvas";
 type Pair<T> = [T, T];
 type NumberPair = Pair<number>;
 type Size = { width: number; height: number };
+type Pos = { x: number; y: number };
 export type PartialSize = Partial<Size>;
+export type RectArea = Size & Pos;
 export type ImageSource = string | HTMLImageElement | types.Image;
 type CreateCanvas = (size?: NumberPair) => HTMLCanvasElement;
 type CloneCanvas = (old: HTMLCanvasElement) => HTMLCanvasElement;
@@ -77,6 +79,26 @@ class ModImage {
       });
       this._setCanvasSize(targetSize);
       this._context.drawImage(clone, 0, 0, ...targetSize);
+    });
+    return this;
+  }
+
+  crop(area: RectArea) {
+    this._pushTask(() => {
+      const clone = this._cloneCanvas();
+      this._clearCanvas();
+      const targetSize = sizeToPair(area);
+      this._setCanvasSize(sizeToPair(area));
+      this._context.drawImage(
+        clone,
+        area.x,
+        area.y,
+        area.width,
+        area.height,
+        0,
+        0,
+        ...targetSize
+      );
     });
     return this;
   }
