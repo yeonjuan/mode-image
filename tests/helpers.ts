@@ -4,7 +4,7 @@ import * as canvas from "canvas";
 import modeImage from "../src/index";
 import { ImageSource } from "../src/types";
 
-type Name = "right-arrow" | "smile" | "walk";
+type Name = "right-arrow" | "smile" | "walk" | "left-arrow";
 type Size = `${number}-${number}`;
 type Ext = "png";
 

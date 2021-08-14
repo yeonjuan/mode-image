@@ -32,6 +32,8 @@ const sin = Math.sin;
 
 const cos = Math.cos;
 
+const max = Math.max;
+
 const getSize = (drawable: { width: number; height: number }): Size => [
   drawable.width,
   drawable.height,
@@ -76,6 +78,10 @@ const calcRotatedSize = (ctx: CanvasContext, radian: number): Size => {
   const cosVal = cos(radian);
   const sinVal = sin(radian);
   return [sinVal * height + cosVal * width, sinVal * width + cosVal * height];
+};
+
+const mergeSize = (sizeA: Size, sizeB: Size): Size => {
+  return mapSize(sizeA, (size, index) => max(size, sizeB[index]));
 };
 
 class ModeImage {
@@ -224,6 +230,20 @@ class ModeImage {
     return this;
   }
 
+  public merge(source: ImageSource) {
+    const loadingImage = this.loadImage(source);
+    this.schedule(async () => {
+      const image = await loadingImage;
+      const copied = this.copyCanvas();
+      this.clearCanvas();
+      const mergedSize = mergeSize(this.getSize(), getSize(image));
+      this.setCanvasSize(mergedSize);
+      this.ctx.drawImage(copied, 0, 0, copied.width, copied.height);
+      this.ctx.drawImage(image, 0, 0, image.width, image.height);
+    });
+    return this;
+  }
+
   public async toDataURL(options?: DataURLOptions): Promise<string> {
     await this.runSchedules();
     return this.canvas.toDataURL(
@@ -233,4 +253,5 @@ class ModeImage {
   }
 }
 
-export default ModeImage.create;
+export default (src: ImageSource, options?: Options) =>
+  ModeImage.create(src, options);
