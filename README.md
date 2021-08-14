@@ -32,6 +32,23 @@ Simple image editing library.
 
 We can specify image source to editing using `modeImage(image source)`.
 
+- Image URL
+
+  <!-- prettier-ignore-start -->
+
+  ```js
+  modeImage("/public/foo.png")
+    .rotate(angle)
+    .crop(area)
+    // ...
+    .toDataURL()
+    .then((result) => {
+      result; // data:image/png;base64,R0lGOD....
+    });
+  ```
+
+  <!-- prettier-ignore-end -->
+
 - Data URL
 
   The URLs string prefixed with the `data:image/...` scheme. see [MDN Data URL](https://developer.mozilla.org/en-US/docs/Web/HTTP/Basics_of_HTTP/Data_URIs)
@@ -80,14 +97,14 @@ We can specify image source to editing using `modeImage(image source)`.
   <!-- prettier-ignore-start -->
 
   ```js
-  import { createCanvas, Image } from "canvas";
+  import { createCanvas, Image, loadImage } from "canvas";
 
   const options = {
     createCanvas: createCanvas,
     createImage: () => new Image(),
   };
-
-  modeImage(src, options)
+  const image = await loadImage("./path/foo.png");
+  modeImage(image, options)
     .rotate()
     .toDataURL()
     .then((result) => {
