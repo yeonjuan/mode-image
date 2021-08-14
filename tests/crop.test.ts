@@ -9,10 +9,10 @@ const crop = (image: canvas.Image, area: RectArea) => {
 
 const cropImage = getImageBufferAfter(crop);
 
-describe("resize", () => {
+describe("crop", () => {
   const img150x150 = fixtures("smile", "150-150", "png");
 
-  it("resize 150x150 to 50x50", async () => {
+  it("150x150 to 50x50", async () => {
     const result = await cropImage(await img150x150, {
       x: 0,
       y: 0,
@@ -22,7 +22,7 @@ describe("resize", () => {
     expect(result).toMatchImageSnapshot();
   });
 
-  it("resize 150x150 to 50x50", async () => {
+  it("150x150 to 50x50", async () => {
     const result = await cropImage(await img150x150, {
       x: 50,
       y: 50,

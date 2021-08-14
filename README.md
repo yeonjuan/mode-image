@@ -12,6 +12,7 @@
   ```
 
 ## Usage
+
 - [rotate](#rotateradian)
 - [resize](#resizesize)
 - [crop](#croparea)

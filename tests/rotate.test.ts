@@ -1,4 +1,3 @@
-import modImage from "../src/index";
 import * as canvas from "canvas";
 import { fixtures, getImageBufferAfter, nodeModeImage } from "./helpers";
 
