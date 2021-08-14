@@ -1,224 +1,257 @@
-import type * as types from "canvas";
+import type {
+  CreateCanvas,
+  CloneCanvas,
+  ImageSource,
+  Options,
+  PartialSize,
+  RectArea,
+  NumberPair,
+  Size,
+  CreateImage,
+  CanvasContext,
+  Task,
+  CanvasCreator,
+  ImageCreator,
+  Drawable,
+  DataURLOptions,
+} from "./types";
 
-type Pair<T> = [T, T];
-type NumberPair = Pair<number>;
-type Size = { width: number; height: number };
-type Pos = { x: number; y: number };
-export type PartialSize = Partial<Size>;
-export type RectArea = Size & Pos;
-export type ImageSource = string | HTMLImageElement | types.Image;
-type CreateCanvas = (size?: NumberPair) => HTMLCanvasElement;
-type CloneCanvas = (old: HTMLCanvasElement) => HTMLCanvasElement;
-type CreateImage = () => HTMLImageElement;
-type Options = {
-  createCanvas?: (...arg: any) => any;
-  createImage?: (...arg: any) => any;
+const DEFAULT_OPTIONS = {
+  createCanvas: () => window.document.createElement("canvas"),
+  createImage: () => new window.Image(),
 };
 
-const DEFAULT_OPTIONS = {};
+const withDefault = <Value>(
+  defaultValue: NonNullable<Value>,
+  value?: Value
+) => {
+  return value ? value : defaultValue;
+};
 
-class ModImage {
-  private readonly _canvas: HTMLCanvasElement;
-  private readonly _context: CanvasRenderingContext2D;
-  private readonly _tasks: (() => any)[] = [];
-  private readonly _createCanvas: CreateCanvas;
-  private readonly _cloneCanvas: () => ReturnType<CloneCanvas>;
-  private readonly _loadImage: (src: ImageSource) => Promise<HTMLImageElement>;
+const sin = Math.sin;
 
-  constructor(src: ImageSource, options: Options = DEFAULT_OPTIONS) {
-    this._createCanvas = this._initCreateCanvas(options);
-    this._cloneCanvas = this._initCloneCanvas();
-    this._loadImage = this._initLoadImage(options);
+const cos = Math.cos;
 
-    this._canvas = this._createCanvas();
-    this._context = this._canvas.getContext("2d")!;
-    this._context.imageSmoothingEnabled = true;
+const max = Math.max;
 
-    this._pushTask(async () => {
-      const image = await this._loadImage(src);
-      this._setCanvasSize([image.width, image.height]);
-      this._context.drawImage(image, 0, 0);
+const getSize = (drawable: { width: number; height: number }): Size => [
+  drawable.width,
+  drawable.height,
+];
+
+const mapSize = (
+  size: Size,
+  mapFn: (num: number, index: number) => number
+): Size => size.map(mapFn) as Size;
+
+const diffSize = (sizeA: Size, sizeB: Size): Size => [
+  sizeA[0] - sizeB[0],
+  sizeA[1] - sizeB[1],
+];
+
+const half = (n: number) => n / 2;
+
+const neg = (n: number) => -n;
+
+const drawRotatedImage = (
+  ctx: CanvasContext,
+  drawable: Drawable,
+  radian: number
+) => {
+  const cSize = mapSize(getSize(ctx.canvas), half);
+  const dSize = getSize(drawable);
+  ctx.translate(...cSize);
+  ctx.rotate(radian);
+  ctx.translate(...mapSize(cSize, neg));
+  ctx.drawImage(drawable, ...diffSize(cSize, mapSize(dSize, half)), ...dSize);
+};
+
+const drawPattern = (ctx: CanvasContext, pattern: CanvasPattern) => {
+  ctx.save();
+  ctx.fillStyle = pattern;
+  ctx.fillRect(0, 0, ...getSize(ctx.canvas));
+  ctx.restore();
+};
+
+const calcRotatedSize = (ctx: CanvasContext, radian: number): Size => {
+  const [width, height] = getSize(ctx.canvas);
+  const cosVal = cos(radian);
+  const sinVal = sin(radian);
+  return [sinVal * height + cosVal * width, sinVal * width + cosVal * height];
+};
+
+const mergeSize = (sizeA: Size, sizeB: Size): Size => {
+  return mapSize(sizeA, (size, index) => max(size, sizeB[index]));
+};
+
+class ModeImage {
+  private readonly canvas: HTMLCanvasElement;
+  private readonly ctx: CanvasContext;
+  private readonly tasks: Task[] = [];
+  private readonly canvasCreator: CanvasCreator;
+  private readonly imageCreator: ImageCreator;
+
+  public static create(src: ImageSource, options?: Options) {
+    return new ModeImage(src, options);
+  }
+
+  private constructor(src: ImageSource, options: Options = {}) {
+    this.canvasCreator = withDefault(
+      DEFAULT_OPTIONS.createCanvas,
+      options.createCanvas
+    );
+    this.imageCreator = withDefault(
+      DEFAULT_OPTIONS.createImage,
+      options.createImage
+    );
+    this.canvas = this.createCanvas();
+    this.ctx = this.canvas.getContext("2d")!;
+
+    const loadingImage = this.loadImage(src);
+    this.schedule(async () => {
+      const image = await loadingImage;
+      this.canvas.width = image.width;
+      this.canvas.height = image.height;
+      this.ctx.drawImage(image, 0, 0);
     });
   }
 
-  /**
-   * ------------------------------------------------------------------------
-   * Public methods
-   * ------------------------------------------------------------------------
-   */
-  rotate(angle: number): this {
-    this._pushTask(() => {
-      const clone = this._cloneCanvas();
-      this._setCanvasSize(calcRotatedSize(this._canvasSize(), angle));
-      this._clearCanvas();
-      const [cx, cy] = this._canvasSize().map(half);
-      this._context.save();
-      this._context.translate(cx, cy);
-      this._context.rotate(angle);
-      this._context.translate(-cx, -cy);
-      this._context.drawImage(
-        clone,
-        cx - clone.width / 2,
-        cy - clone.height / 2,
-        clone.width,
-        clone.height
-      );
-      this._context.restore();
+  private loadImage(src: ImageSource): Promise<HTMLImageElement> {
+    if (typeof src === "object")
+      return Promise.resolve(src as HTMLImageElement);
+    const image = this.imageCreator() as HTMLImageElement;
+    return new Promise((resolve, reject) => {
+      image.onload = () => resolve(image);
+      image.onerror = () => reject(new Error("Load failed"));
+      (image as any).crossOrigin = "Anonymous";
+      image.src = src;
+    });
+  }
+
+  private schedule(task: Task) {
+    this.tasks.push(task);
+  }
+
+  private createCanvas(size?: Size) {
+    const canvas = this.canvasCreator();
+    size && ([canvas.width, canvas.height] = size);
+    return canvas;
+  }
+
+  private setCanvasSize(size: Size) {
+    [this.canvas.width, this.canvas.height] = size;
+  }
+
+  private copyCanvas() {
+    const size = this.getSize();
+    const copied = this.createCanvas(size);
+    copied.getContext("2d")!.drawImage(this.canvas, 0, 0, ...size);
+    return copied;
+  }
+
+  private clearCanvas() {
+    this.ctx.clearRect(0, 0, ...this.getSize());
+  }
+
+  private getSize() {
+    return getSize(this.canvas);
+  }
+
+  private async runSchedules() {
+    for (const task of this.tasks) {
+      await task();
+    }
+  }
+
+  public rotate(radian: number): this {
+    this.schedule(() => {
+      const copied = this.copyCanvas();
+      this.setCanvasSize(calcRotatedSize(this.ctx, radian));
+      this.clearCanvas();
+      drawRotatedImage(this.ctx, copied, radian);
     });
     return this;
   }
 
-  resize(size: PartialSize): this {
-    this._pushTask(() => {
-      const clone = this._cloneCanvas();
-      this._clearCanvas();
-      const [width, height] = this._canvasSize();
-      const targetSize = sizeToPair({
-        width: size.width || width,
-        height: size.height || height,
-      });
-      this._setCanvasSize(targetSize);
-      this._context.drawImage(clone, 0, 0, ...targetSize);
+  public resize(resize: PartialSize): this {
+    this.schedule(() => {
+      const copied = this.copyCanvas();
+      const curSize = this.getSize();
+      this.clearCanvas();
+      const size: Size = [
+        resize.width || curSize[0],
+        resize.height || curSize[1],
+      ];
+      this.setCanvasSize(size);
+      this.ctx.drawImage(copied, 0, 0, ...size);
     });
     return this;
   }
 
-  crop(area: RectArea) {
-    this._pushTask(() => {
-      const clone = this._cloneCanvas();
-      this._clearCanvas();
-      const targetSize = sizeToPair(area);
-      this._setCanvasSize(sizeToPair(area));
-      this._context.drawImage(
-        clone,
+  public crop(area: RectArea): this {
+    this.schedule(() => {
+      const copied = this.copyCanvas();
+      this.clearCanvas();
+      const size = getSize(area);
+      this.setCanvasSize(size);
+      this.ctx.drawImage(
+        copied,
         area.x,
         area.y,
         area.width,
         area.height,
         0,
         0,
-        ...targetSize
+        ...size
       );
     });
     return this;
   }
 
-  merge(source: ImageSource) {
-    this._pushTask(async () => {
-      const image = await this._loadImage(source);
-      this._context.drawImage(image, 0, 0, image.width, image.height);
+  public repeatX(repeat: number): this {
+    this.schedule(() => {
+      const copied = this.copyCanvas();
+      this.clearCanvas();
+      const [width, height] = getSize(this.canvas);
+      this.setCanvasSize([width * repeat, height]);
+      drawPattern(this.ctx, this.ctx.createPattern(copied, "repeat-x")!);
     });
     return this;
   }
 
-  async toDataURL(): Promise<string> {
-    return this._runTasks().then(() => this._canvas.toDataURL("image/png", 1));
+  public repeatY(repeat: number): this {
+    this.schedule(() => {
+      const copied = this.copyCanvas();
+      this.clearCanvas();
+      const [width, height] = getSize(this.canvas);
+      this.setCanvasSize([width, repeat * height]);
+      drawPattern(this.ctx, this.ctx.createPattern(copied, "repeat-y")!);
+    });
+    return this;
   }
 
-  /**
-   * ------------------------------------------------------------------------
-   * Privates methods
-   * ------------------------------------------------------------------------
-   */
-  private _clearCanvas(): void {
-    this._context.clearRect(0, 0, ...this._canvasSize());
+  public merge(source: ImageSource) {
+    const loadingImage = this.loadImage(source);
+    this.schedule(async () => {
+      const image = await loadingImage;
+      const copied = this.copyCanvas();
+      this.clearCanvas();
+      const mergedSize = mergeSize(this.getSize(), getSize(image));
+      this.setCanvasSize(mergedSize);
+      this.ctx.drawImage(copied, 0, 0, copied.width, copied.height);
+      this.ctx.drawImage(image, 0, 0, image.width, image.height);
+    });
+    return this;
   }
 
-  private _canvasSize(): NumberPair {
-    return [this._canvas.width, this._canvas.height];
-  }
-
-  private _setCanvasSize(size: NumberPair): void {
-    [this._canvas.width, this._canvas.height] = size;
-  }
-
-  private _pushTask(task: () => any): void {
-    this._tasks.push(task);
-  }
-
-  private async _runTasks(): Promise<void> {
-    for (const task of this._tasks) {
-      await task();
-    }
-  }
-
-  private _initCreateCanvas(options: Options) {
-    const _createCanvas = options.createCanvas;
-    const createCanvas =
-      typeof _createCanvas === "function"
-        ? () => _createCanvas()
-        : () => window.document.createElement("canvas");
-    return initCreateCanvas(createCanvas).bind(this);
-  }
-
-  private _initLoadImage(options: Options) {
-    const _createImage = options.createImage;
-    const createImage =
-      typeof _createImage === "function"
-        ? _createImage
-        : () => new window.Image();
-    return initLoadImage(createImage).bind(this);
-  }
-
-  private _initCloneCanvas() {
-    const _cloneCanvas = initCloneCanvas(this._createCanvas).bind(this);
-    return () => _cloneCanvas(this._canvas);
+  public async toDataURL(options?: DataURLOptions): Promise<string> {
+    await this.runSchedules();
+    return this.canvas.toDataURL(
+      withDefault("image/png", options?.type),
+      withDefault(1, options?.quality)
+    );
   }
 }
 
-const half = (x: number): number => x / 2;
-const neg = (x: number): number => -x;
-
-const initCreateCanvas = (createCanvas: CreateCanvas) => {
-  return (size?: NumberPair): HTMLCanvasElement => {
-    const canvas = createCanvas();
-    size && ([canvas.width, canvas.height] = size);
-    return canvas;
-  };
-};
-
-const initCloneCanvas = (createCanvas: CreateCanvas) => {
-  return (old: HTMLCanvasElement) => {
-    const clone = createCanvas([old.width, old.height]);
-    clone.getContext("2d")!.drawImage(old, 0, 0, old.width, old.height);
-    return clone;
-  };
-};
-
-const initLoadImage = (createImage: CreateImage) => {
-  return (src: ImageSource): Promise<HTMLImageElement> => {
-    if (typeof src === "object") {
-      return Promise.resolve(src as HTMLImageElement);
-    }
-    const image = createImage();
-    return new Promise((resolve, reject) => {
-      image.onload = () => resolve(image);
-      image.onerror = () => reject(new Error("Load failed"));
-      image.crossOrigin = "Anonymous";
-      image.src = src;
-    });
-  };
-};
-
-const sin = Math.sign;
-const cos = Math.cos;
-
-const calcRotatedSize = (
-  [width, height]: NumberPair,
-  radian: number
-): NumberPair => {
-  const cosRadian = cos(radian);
-  const sinRadian = sin(radian);
-  const rSize: NumberPair = [
-    sinRadian * height + cosRadian * width,
-    sinRadian * width + cosRadian * height,
-  ];
-  return rSize;
-};
-
-const sizeToPair = ({ width, height }: Size): NumberPair => {
-  return [width, height];
-};
-
 export default (src: ImageSource, options?: Options) =>
-  new ModImage(src, options);
+  ModeImage.create(src, options);

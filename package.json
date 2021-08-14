@@ -1,10 +1,10 @@
 {
   "name": "mode-image",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "",
   "scripts": {
     "check": "tsc --noEmit",
-    "build": "rollup -c rollup.config.js",
+    "build": "rimraf build && rollup -c rollup.config.js && tsc --emitDeclarationOnly",
     "format": "prettier --write .",
     "test": "jest"
   },
@@ -29,10 +29,15 @@
     "jest": "^27.0.6",
     "jest-image-snapshot": "^4.5.1",
     "prettier": "^2.3.2",
+    "rimraf": "^3.0.2",
     "rollup": "^2.56.2",
     "ts-jest": "^27.0.4",
     "ts-node": "^10.2.0",
     "typescript": "^4.3.5"
   },
-  "dependencies": {}
+  "dependencies": {},
+  "files": [
+    "build",
+    "README.md"
+  ]
 }
